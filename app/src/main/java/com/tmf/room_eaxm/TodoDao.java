@@ -2,6 +2,7 @@ package com.tmf.room_eaxm;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -11,7 +12,7 @@ import androidx.room.Update;
 @Dao
 public interface TodoDao {
     @Query("SELECT * FROM Todo")
-    List<Todo> getAll();
+    LiveData<List<Todo>> getAll();
 
     @Insert
     void insert(Todo todo);
