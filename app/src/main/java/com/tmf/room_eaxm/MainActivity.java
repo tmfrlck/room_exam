@@ -1,12 +1,11 @@
 package com.tmf.room_eaxm;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.room.Room;
+import androidx.lifecycle.ViewModelProvider;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,31 +20,30 @@ public class MainActivity extends AppCompatActivity {
         mTodoEditText = findViewById(R.id.todo_edit);
         mResultTextView = findViewById(R.id.result_text);
 
-        // UI 갱신
-        final AppDatabase db = Room.databaseBuilder(this, AppDatabase.class, "todo-db").build();
+        // https://developer.android.google.cn/topic/libraries/architecture/viewmodel?hl=ko#java
+        //MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        /**
+         // ViewModel 사용법(업데이트)
+         NormalViewModel normalViewModel = new ViewModelProvider(this).get(NormalViewModel.class);
+         normalViewModel.print();
 
-        db.todoDao().getAll().observe(this, todos -> {
+         MyAndroidViewModel myAndroidViewModel = new ViewModelProvider(this, new ViewModelProvider.AndroidViewModelFactory(getApplication())).get(MyAndroidViewModel.class);
+         myAndroidViewModel.print();
+         */
+
+        MainViewModel viewModel = new ViewModelProvider(this, new ViewModelProvider.AndroidViewModelFactory(getApplication()))
+                .get(MainViewModel.class);
+
+        // UI 갱신
+        viewModel.getAll().observe(this, todos -> {
             mResultTextView.setText(todos.toString());
         });
 
         // 버튼 클릭 시 DB에 insert
         findViewById(R.id.add_button).setOnClickListener(view -> {
-            new InsertAsyncTask(db.todoDao()).execute(new Todo(mTodoEditText.getText().toString()));
+            viewModel.insert(new Todo(mTodoEditText.getText().toString()));
         });
-
     }
 
-    private static class InsertAsyncTask extends AsyncTask<Todo, Void, Void> {
-        private TodoDao mTodoDao;
 
-        public InsertAsyncTask(TodoDao todoDao) {
-            this.mTodoDao = todoDao;
-        }
-
-        @Override
-        protected Void doInBackground(Todo... todos) {
-            mTodoDao.insert(todos[0]);
-            return null;
-        }
-    }
 }
